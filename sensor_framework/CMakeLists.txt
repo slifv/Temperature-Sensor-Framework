@@ -154,6 +154,16 @@ if(BUILD_TESTS)
         target_link_libraries(test_fixed_filter PRIVATE sensor_framework)
         target_compile_definitions(test_fixed_filter PRIVATE -DSENSOR_FEATURE_FIXED_POINT_MATH=1)
 
+        add_executable(test_app_subscribers
+            tests/whitebox/test_app_subscribers.cpp)
+        target_include_directories(test_app_subscribers PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_app_subscribers PRIVATE sensor_framework)
+
+        add_executable(test_ntc
+            tests/whitebox/test_ntc.cpp)
+        target_include_directories(test_ntc PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_ntc PRIVATE sensor_framework)
+
         # Blackbox tests
         add_executable(test_sensor_pipeline
             tests/blackbox/test_sensor_pipeline.cpp)
@@ -172,9 +182,11 @@ if(BUILD_TESTS)
         add_test(NAME MockHAL           COMMAND test_mock_hal)
         add_test(NAME SHT30             COMMAND test_sht30)
         add_test(NAME FixedFilter       COMMAND test_fixed_filter)
+        add_test(NAME AppSubscribers    COMMAND test_app_subscribers)
+        add_test(NAME NTC               COMMAND test_ntc)
         add_test(NAME SensorPipeline    COMMAND test_sensor_pipeline)
 
-        message(STATUS "Tests enabled: 12 test executables")
+        message(STATUS "Tests enabled: 14 test executables")
     endif()
 endif()
 
