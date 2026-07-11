@@ -11,7 +11,9 @@
 
 #if SENSOR_FEATURE_TEST_FRAMEWORK
 
+#include <cstdarg>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 
 // ============================================================
@@ -127,6 +129,16 @@ inline TestRegistry& getTestRegistry() {
     static bool test_##suite##_##name()
 
 // ============================================================
+//  测试输出函数（前置声明）
+// ============================================================
+
+/// 测试输出 — 默认 printf, 嵌入式平台可重写
+inline void testPrint(const char* fmt, ...);
+
+/// 报告测试失败
+inline void testReportFailure(const char* file, int line, const char* msg);
+
+// ============================================================
 //  测试运行器
 // ============================================================
 
@@ -162,13 +174,10 @@ inline void testReportFailure(const char* file, int line, const char* msg) {
 
 /// 测试输出 — 默认 printf, 嵌入式平台可重写
 inline void testPrint(const char* fmt, ...) {
-    // 简化: 直接使用 printf（PC端）
-    // 嵌入式平台: 替换为 UART printf
-#if !defined(SENSOR_MCU_8BIT) && !defined(SENSOR_MCU_16BIT)
-    extern int printf(const char* fmt, ...);
-    // Note: variadic forwarding simplified here
-    // In practice, use vfprintf or platform-specific serial output
-#endif
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
 }
 
 /// 获取测试摘要

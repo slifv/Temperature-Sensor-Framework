@@ -32,7 +32,12 @@ public:
         , status_(SensorStatus::UNINIT)
         , config_(SensorConfig::defaultConfig())
         , sequenceNum_(0)
-    {}
+        , errorCount_(0)
+    {
+        IF_FILTER_PIPELINE_ENABLED(
+            filterPipeline_ = NULL;
+        )
+    }
 
     virtual ~SensorBase() {
         IF_FILTER_PIPELINE_ENABLED(

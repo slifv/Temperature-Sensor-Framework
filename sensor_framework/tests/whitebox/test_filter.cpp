@@ -147,7 +147,7 @@ TEST(LowPassFilter, SmoothingEffect) {
 // ============================================================
 
 TEST(KalmanFilter, ConvergenceToTrueValue) {
-    KalmanFilter kf(0.01f, 0.5f);
+    KalmanFilter kf(0.01f, 0.5f, 25.0f);  // 初始估计=25.0（接近真值加速收敛）
 
     // 模拟恒温25.0°C带噪声的测量
     float noisyReadings[] = {

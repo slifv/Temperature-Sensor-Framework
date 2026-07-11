@@ -63,6 +63,60 @@ int main() {
 
 ---
 
+## 构建与测试
+
+### 前置条件
+
+- **CMake** ≥ 3.10
+- **C++11 编译器**: GCC / Clang / MSVC
+- **Windows 推荐**: 安装 [MSYS2](https://www.msys2.org/) (`pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake`)
+
+### 构建
+
+```bash
+cd sensor_framework
+mkdir build && cd build
+
+# 配置（ADVANCED profile 包含全部滤波器，适合测试）
+cmake .. -G "MinGW Makefiles" \
+  -DSENSOR_PROFILE=ADVANCED \
+  -DBUILD_TESTS=ON \
+  -DSENSOR_NO_EXCEPTIONS=OFF \
+  -DSENSOR_NO_RTTI=OFF
+
+# 编译（使用所有CPU核心）
+mingw32-make -j$(nproc)
+```
+
+> **Linux/macOS**: 使用 `make` 替代 `mingw32-make`，省略 `-G` 参数。
+>
+> **MSVC**: 使用 `-G "Visual Studio 17 2022"`，`cmake --build . --config Release`。
+
+### 运行测试
+
+```bash
+# 运行全部测试（带失败详情）
+ctest --output-on-failure
+
+# 或单独运行
+./test_filter.exe
+./test_event_bus.exe
+./test_sensor_manager.exe
+./test_exception.exe
+./test_sensor_pipeline.exe
+```
+
+### Profile 选项
+
+| Profile | 命令 | 滤波器 | 事件总线 | 异常监控 |
+|---------|------|--------|---------|---------|
+| **MINIMAL** | `-DSENSOR_PROFILE=MINIMAL` | — | — | — |
+| **STANDARD** | `-DSENSOR_PROFILE=STANDARD` | 均值+低通 | ✅ | 基础 |
+| **ADVANCED** | `-DSENSOR_PROFILE=ADVANCED` | 全8种 | ✅ | 全功能 |
+| **MINIMAL_8BIT** | `-DSENSOR_PROFILE=MINIMAL_8BIT` | 定点均值 | — | — |
+
+---
+
 ## 核心概念
 
 ### 架构分层

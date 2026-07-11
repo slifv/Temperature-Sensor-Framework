@@ -48,7 +48,7 @@ public:
 
     const char* getName() const SENSOR_OVERRIDE { return "StubSensor"; }
 
-    void reset() SENSOR_OVERRIDE { SensorBase::reset(); }
+    bool reset() SENSOR_OVERRIDE { SensorBase::reset(); return true; }
 
     bool initCalled_;
     bool startCalled_;

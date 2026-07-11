@@ -39,6 +39,7 @@ public:
         , openedAt_(0)
         , totalSuccesses_(0)
         , totalFailures_(0)
+        , tickProvider_(NULL)
     {}
 
     /// 记录一次操作成功
