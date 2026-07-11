@@ -139,6 +139,73 @@ TEST(EventBus, DifferentSensorsIsolated) {
     return true;
 }
 
+// ============================================================
+//  边界条件 / 错误路径测试
+// ============================================================
+
+TEST(EventBus, EmptySubscriptionPublish) {
+    EventBus<>& bus = EventBus<>::getInstance();
+
+    SensorData data;
+    data.sensorId = 999;
+    data.value = 50.0f;
+    bus.publish(data);  // 无订阅者 → 不崩溃
+
+    TEST_ASSERT_TRUE(bus.getSubscriberCount(999) == 0, "No subscribers for unknown sensor");
+    return true;
+}
+
+TEST(EventBus, NullSubscriberProtection) {
+    EventBus<>& bus = EventBus<>::getInstance();
+    bus.subscribe(1, NULL);  // 不应崩溃
+    TEST_ASSERT_TRUE(bus.getSubscriberCount(1) == 0, "NULL subscriber should be rejected");
+    return true;
+}
+
+TEST(EventBus, DuplicateSubscription) {
+    EventBus<>& bus = EventBus<>::getInstance();
+    TestSubscriber sub("DupSub");
+
+    bus.subscribe(300, &sub);
+    bus.subscribe(300, &sub);  // 重复订阅
+
+    SensorData data;
+    data.sensorId = 300;
+    data.value = 10.0f;
+    bus.publish(data);
+
+    TEST_ASSERT_TRUE(sub.getCallCount() == 2, "Duplicate subscriber receives twice (current behavior)");
+
+    bus.unsubscribeAll(300);
+    return true;
+}
+
+TEST(EventBus, UnsubscribeAllClearsAll) {
+    EventBus<>& bus = EventBus<>::getInstance();
+    TestSubscriber sub1("A"), sub2("B");
+
+    bus.subscribe(400, &sub1);
+    bus.subscribe(400, &sub2);
+    TEST_ASSERT_TRUE(bus.getSubscriberCount(400) == 2, "Should have 2 subscribers");
+
+    bus.unsubscribeAll(400);
+    TEST_ASSERT_TRUE(bus.getSubscriberCount(400) == 0, "All subscribers should be cleared");
+    return true;
+}
+
+TEST(EventBus, GetBindingCount) {
+    EventBus<>& bus = EventBus<>::getInstance();
+    TestSubscriber sub("BindTest");
+
+    uint8_t before = bus.getBindingCount();
+    bus.subscribe(500, &sub);
+    uint8_t after = bus.getBindingCount();
+    TEST_ASSERT_TRUE(after >= before, "Binding count should increase after subscribe");
+
+    bus.unsubscribeAll(500);
+    return true;
+}
+
 int main() {
     runAllTests();
     printTestSummary();

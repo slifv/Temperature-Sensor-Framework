@@ -166,6 +166,122 @@ TEST(SensorManager, FindByType) {
     return true;
 }
 
+// ============================================================
+//  边界条件 / 错误路径测试
+// ============================================================
+
+TEST(SensorManager, NullSensorRejected) {
+    auto& manager = SensorManager<>::getInstance();
+    bool ok = manager.registerSensor(NULL);
+    TEST_ASSERT_TRUE(!ok, "NULL sensor should be rejected");
+    manager.destroyAll();
+    return true;
+}
+
+TEST(SensorManager, UnregisterSensor) {
+    auto& manager = SensorManager<>::getInstance();
+
+    StubSensor* s = new StubSensor(0x30);
+    manager.registerSensor(s);
+    TEST_ASSERT_TRUE(manager.getSensorCount() == 1, "Should have 1 sensor");
+
+    bool removed = manager.unregisterSensor(0x30);
+    TEST_ASSERT_TRUE(removed, "Unregister should succeed");
+    TEST_ASSERT_TRUE(manager.getSensorCount() == 0, "Should have 0 sensors after unregister");
+    return true;
+}
+
+TEST(SensorManager, StopAll) {
+    auto& manager = SensorManager<>::getInstance();
+
+    StubSensor* s1 = new StubSensor(1);
+    StubSensor* s2 = new StubSensor(2);
+    manager.registerSensor(s1);
+    manager.registerSensor(s2);
+    manager.initAll();
+    manager.startAll();
+
+    manager.stopAll();
+    TEST_ASSERT_TRUE(s1->getStatus() == SensorStatus::STOPPED, "Sensor1 should be STOPPED");
+    TEST_ASSERT_TRUE(s2->getStatus() == SensorStatus::STOPPED, "Sensor2 should be STOPPED");
+
+    manager.destroyAll();
+    return true;
+}
+
+TEST(SensorManager, GetSensorAtOutOfBounds) {
+    auto& manager = SensorManager<>::getInstance();
+
+    SensorBase<SensorData>* found = manager.getSensorAt(0);
+    TEST_ASSERT_TRUE(found == NULL, "getSensorAt on empty manager should return NULL");
+
+    found = manager.getSensorAt(255);
+    TEST_ASSERT_TRUE(found == NULL, "getSensorAt 255 should return NULL");
+
+    manager.destroyAll();
+    return true;
+}
+
+TEST(SensorManager, GetCountByStatus) {
+    auto& manager = SensorManager<>::getInstance();
+
+    StubSensor* s = new StubSensor(1);
+    manager.registerSensor(s);
+
+    uint8_t uninit = manager.getCountByStatus(SensorStatus::UNINIT);
+    TEST_ASSERT_TRUE(uninit == 1, "Should have 1 UNINIT sensor");
+
+    manager.initAll();
+    uint8_t ready = manager.getCountByStatus(SensorStatus::READY);
+    TEST_ASSERT_TRUE(ready == 1, "Should have 1 READY sensor after init");
+
+    manager.startAll();
+    uint8_t running = manager.getCountByStatus(SensorStatus::RUNNING);
+    TEST_ASSERT_TRUE(running == 1, "Should have 1 RUNNING sensor after start");
+
+    manager.destroyAll();
+    return true;
+}
+
+// 全局变量用于 sampleAll 回调测试（C++11 lambda 无法转为函数指针）
+static uint8_t g_sampleCallCount = 0;
+static void sampleCallback(const SensorData& data) {
+    ++g_sampleCallCount;
+    (void)data;
+}
+
+TEST(SensorManager, SampleAllCallback) {
+    auto& manager = SensorManager<>::getInstance();
+
+    StubSensor* s = new StubSensor(1);
+    manager.registerSensor(s);
+    manager.initAll();
+    manager.startAll();
+
+    g_sampleCallCount = 0;
+    manager.sampleAll(sampleCallback);
+
+    TEST_ASSERT_TRUE(g_sampleCallCount == 1, "sampleAll should invoke callback once for running sensor");
+
+    manager.destroyAll();
+    return true;
+}
+
+TEST(SensorManager, EmptyManagerOperations) {
+    auto& manager = SensorManager<>::getInstance();
+
+    TEST_ASSERT_TRUE(manager.getSensorCount() == 0, "Empty manager: count=0");
+    TEST_ASSERT_TRUE(manager.findSensorById(1) == NULL, "Empty manager: findById returns NULL");
+    TEST_ASSERT_TRUE(manager.findSensorByType(SensorType::TEMPERATURE) == NULL, "Empty manager: findByType returns NULL");
+    TEST_ASSERT_TRUE(manager.initAll() == 0, "Empty manager: initAll returns 0");
+    TEST_ASSERT_TRUE(manager.startAll() == 0, "Empty manager: startAll returns 0");
+    // stopAll + sampleAll on empty manager should not crash
+    manager.stopAll();
+    manager.sampleAll(NULL);
+
+    return true;
+}
+
 int main() {
     runAllTests();
     printTestSummary();

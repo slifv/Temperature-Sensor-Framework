@@ -117,6 +117,21 @@ if(BUILD_TESTS)
         target_include_directories(test_exception PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
         target_link_libraries(test_exception PRIVATE sensor_framework)
 
+        add_executable(test_static_vector
+            tests/whitebox/test_static_vector.cpp)
+        target_include_directories(test_static_vector PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_static_vector PRIVATE sensor_framework)
+
+        add_executable(test_sensor_base
+            tests/whitebox/test_sensor_base.cpp)
+        target_include_directories(test_sensor_base PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_sensor_base PRIVATE sensor_framework)
+
+        add_executable(test_ring_buffer
+            tests/whitebox/test_ring_buffer.cpp)
+        target_include_directories(test_ring_buffer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_ring_buffer PRIVATE sensor_framework)
+
         # Blackbox tests
         add_executable(test_sensor_pipeline
             tests/blackbox/test_sensor_pipeline.cpp)
@@ -128,9 +143,12 @@ if(BUILD_TESTS)
         add_test(NAME EventBus          COMMAND test_event_bus)
         add_test(NAME SensorManager     COMMAND test_sensor_manager)
         add_test(NAME Exception         COMMAND test_exception)
+        add_test(NAME StaticVector      COMMAND test_static_vector)
+        add_test(NAME SensorBase        COMMAND test_sensor_base)
+        add_test(NAME RingBuffer        COMMAND test_ring_buffer)
         add_test(NAME SensorPipeline    COMMAND test_sensor_pipeline)
 
-        message(STATUS "Tests enabled: 5 test executables")
+        message(STATUS "Tests enabled: 8 test executables")
     endif()
 endif()
 
