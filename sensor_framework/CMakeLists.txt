@@ -132,6 +132,28 @@ if(BUILD_TESTS)
         target_include_directories(test_ring_buffer PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
         target_link_libraries(test_ring_buffer PRIVATE sensor_framework)
 
+        add_executable(test_q_math
+            tests/whitebox/test_q_math.cpp)
+        target_include_directories(test_q_math PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_q_math PRIVATE sensor_framework)
+        target_compile_definitions(test_q_math PRIVATE -DSENSOR_FEATURE_FIXED_POINT_MATH=1)
+
+        add_executable(test_mock_hal
+            tests/whitebox/test_mock_hal.cpp)
+        target_include_directories(test_mock_hal PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_mock_hal PRIVATE sensor_framework)
+
+        add_executable(test_sht30
+            tests/whitebox/test_sht30.cpp)
+        target_include_directories(test_sht30 PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_sht30 PRIVATE sensor_framework)
+
+        add_executable(test_fixed_filter
+            tests/whitebox/test_fixed_filter.cpp)
+        target_include_directories(test_fixed_filter PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+        target_link_libraries(test_fixed_filter PRIVATE sensor_framework)
+        target_compile_definitions(test_fixed_filter PRIVATE -DSENSOR_FEATURE_FIXED_POINT_MATH=1)
+
         # Blackbox tests
         add_executable(test_sensor_pipeline
             tests/blackbox/test_sensor_pipeline.cpp)
@@ -146,9 +168,13 @@ if(BUILD_TESTS)
         add_test(NAME StaticVector      COMMAND test_static_vector)
         add_test(NAME SensorBase        COMMAND test_sensor_base)
         add_test(NAME RingBuffer        COMMAND test_ring_buffer)
+        add_test(NAME QMath             COMMAND test_q_math)
+        add_test(NAME MockHAL           COMMAND test_mock_hal)
+        add_test(NAME SHT30             COMMAND test_sht30)
+        add_test(NAME FixedFilter       COMMAND test_fixed_filter)
         add_test(NAME SensorPipeline    COMMAND test_sensor_pipeline)
 
-        message(STATUS "Tests enabled: 8 test executables")
+        message(STATUS "Tests enabled: 12 test executables")
     endif()
 endif()
 

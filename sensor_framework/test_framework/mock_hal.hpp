@@ -34,7 +34,7 @@ public:
         size_t  len;
     };
 
-    MockI2CBus() : writeCount_(0), readCount_(0) {}
+    MockI2CBus() : writeCount_(0), readCount_(0), nackCount_(0) {}
 
     // ─── 预设设备行为 ──────────────────────────────────
 

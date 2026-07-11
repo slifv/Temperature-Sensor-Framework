@@ -168,7 +168,9 @@ public:
     Q15_16() : v_(0) {}
     explicit Q15_16(q15_16_t raw) : v_(raw) {}
     explicit Q15_16(float f) : v_(qmath::fromFloat(f)) {}
-    explicit Q15_16(int32_t i) : v_(qmath::fromInt(i)) {}
+
+    /// 从整数构造的静态工厂（避免与 q15_16_t=int32_t 冲突）
+    static Q15_16 fromInt(int32_t i) { return Q15_16(qmath::fromInt(i)); }
 
     float toFloat() const { return qmath::toFloat(v_); }
     q15_16_t raw() const { return v_; }
